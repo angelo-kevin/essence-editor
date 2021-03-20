@@ -498,11 +498,11 @@ class NewMethod extends Component {
         competency_detail.description = this.state.competency_description ? this.state.competency_description : ''
 
 
-        // competency_detail.level.Assists =  this.state.Assists ? this.state.Assists : ''
-        // competency_detail.level.Applies =  this.state.Applies ? this.state.Applies : ''
-        // competency_detail.level.Masters =  this.state.Masters ? this.state.Masters : ''
-        // competency_detail.level.Adapt =  this.state.Adapt ? this.state.Adapt : ''
-        // competency_detail.level.Innovates =  this.state.Innovates ? this.state.Innovates : ''
+        competency_detail.level.Assists =  this.state.Assists ? this.state.Assists : ''
+        competency_detail.level.Applies =  this.state.Applies ? this.state.Applies : ''
+        competency_detail.level.Masters =  this.state.Masters ? this.state.Masters : ''
+        competency_detail.level.Adapt =  this.state.Adapt ? this.state.Adapt : ''
+        competency_detail.level.Innovates =  this.state.Innovates ? this.state.Innovates : ''
 
 
         this.props.graph_global.getModel().beginUpdate()
@@ -729,6 +729,15 @@ class NewMethod extends Component {
                 this.state.Masters = data.detail.level.Masters ;
                 this.state.Adapt = data.detail.level.Adapt ;
                 this.state.Innovates = data.detail.level.Innovates ;
+
+                let values = [
+                    data.detail.level.Assists ? "" : "Assists",
+                    data.detail.level.Applies ? "" : "Applies",
+                    data.detail.level.Masters ? "" : "Masters",
+                    data.detail.level.Adapt ? "" : "Adapt",
+                    data.detail.level.Innovates ? "" : "Innovates"
+                ]
+
                 return (
                     <div className={classes.paper}>Edit Competency Detail
                         <br/><br/>
@@ -758,11 +767,11 @@ class NewMethod extends Component {
                         Level
                         <br/>
                         <br/>
-                        <input defaultChecked={data.detail.level.Assists } type="checkbox" onClick={this.updateState.bind(this)} name="Assists" value="Assists"/>Assists
-                        <input defaultChecked={data.detail.level.Applies } type="checkbox" onClick={this.updateState.bind(this)} name="Applies" value="Applies"/>Applies
-                        <input defaultChecked={data.detail.level.Masters } type="checkbox" onClick={this.updateState.bind(this)} name="Masters" value="Masters"/>Masters
-                        <input defaultChecked={data.detail.level.Adapt } type="checkbox" onClick={this.updateState.bind(this)} name="Adapt" value="Adapt"/>Adapt
-                        <input defaultChecked={data.detail.level.Innovates } type="checkbox" onClick={this.updateState.bind(this)} name="Innovates" value="Innovates"/>Innovates
+                        <input defaultChecked={data.detail.level.Assists } type="checkbox" onClick={this.updateState.bind(this)} name="Assists" value={values[0]}/>Assists
+                        <input defaultChecked={data.detail.level.Applies } type="checkbox" onClick={this.updateState.bind(this)} name="Applies" value={values[1]}/>Applies
+                        <input defaultChecked={data.detail.level.Masters } type="checkbox" onClick={this.updateState.bind(this)} name="Masters" value={values[2]}/>Masters
+                        <input defaultChecked={data.detail.level.Adapt } type="checkbox" onClick={this.updateState.bind(this)} name="Adapt" value={values[3]}/>Adapt
+                        <input defaultChecked={data.detail.level.Innovates } type="checkbox" onClick={this.updateState.bind(this)} name="Innovates" value={values[4]}/>Innovates
                         <br/>
                         <br/>
                         <Button variant="contained" color="primary" onClick={this.saveCompetency.bind(this)} color="primary">

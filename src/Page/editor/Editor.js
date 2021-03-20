@@ -24,6 +24,7 @@ import './Editor.css'
 import { black } from "ansi-colors";
 import Json from "../../Assets/Action/json_icon.png";
 import SaveIcon from "../../Assets/Action/save.png";
+import ValidateIcon from "../../Assets/Action/validate.jpg";
 import Alpha from "../../Assets/EssenceKernel/Alpha.png";
 import ActivityPng from "../../Assets/EssenceKernel/Activity.png";
 import ActivitySpacePng from "../../Assets/EssenceKernel/Activity_Space.png";
@@ -45,6 +46,7 @@ import ActivitySpaceSolutionPng from "../../Assets/EssenceKernel/Activity_Space_
 import CompetencySolutionPng from "../../Assets/EssenceKernel/Competency_Solution.png";
 import WorkProductSolutionPng from "../../Assets/EssenceKernel/Work_Product_Solution.png";
 import KernelDetail from "../../Component/kernelDetail/KernelDetail";
+import ValidateDetail from "../../Component/validateDetail/ValidateDetail";
 import Modal from "@material-ui/core/Modal/Modal";
 import Button from "@material-ui/core/Button/Button";
 
@@ -59,6 +61,7 @@ export default class Editor extends Component {
         this.state = {
             loading : true,
             openForm : false,
+            openValidate : false,
             name: '',
             description: '',
             author: '',
@@ -81,6 +84,7 @@ export default class Editor extends Component {
         this.toJSON = this.toJSON.bind(this);
         this.saveData = this.saveData.bind(this);
         this.stringifyWithoutCircular = this.stringifyWithoutCircular.bind(this)
+        this.validateMethod = this.validateMethod.bind(this)
 
         console.log(this.props.match.params.id)
 
@@ -140,6 +144,18 @@ export default class Editor extends Component {
 
     };
 
+    openValidate(){
+        this.setState({
+            openValidate: true
+        })
+    }
+
+    closeValidate(){
+        this.setState({
+            openValidate: false
+        })
+    }
+
     saveData() {
         var util = require('util')
 
@@ -179,6 +195,10 @@ export default class Editor extends Component {
 
 
         console.log(this.state)
+    }
+
+    validateMethod() {
+        this.openValidate();
     }
 
     componentDidMount() {
@@ -245,15 +265,15 @@ export default class Editor extends Component {
 
             for (var j = 0 ; j < alpha_detail.subAlpha.length ; j++) {
                 let subAlpha = {
-                    name_id : alpha_detail.subAlpha[i].value.replace(/\s/g, ''),
-                    name : alpha_detail.subAlpha[i].value,
-                    description : alpha_detail.subAlpha[i].detail.description,
+                    name_id : alpha_detail.subAlpha[j].value.replace(/\s/g, ''),
+                    name : alpha_detail.subAlpha[j].value,
+                    description : alpha_detail.subAlpha[j].detail.description,
                     workProduct : [],
                     state : [],
 
                 }
 
-                let subAlpha_detail = alpha_detail.subAlpha[i].detail
+                let subAlpha_detail = alpha_detail.subAlpha[j].detail
 
                 for (var k = 0 ; k < subAlpha_detail.workProduct.length ; k++) {
                     let workProductData = {
@@ -1480,6 +1500,7 @@ export default class Editor extends Component {
                     <div className="topnav">
                         <button onClick={this.toJSON}><img src={Json}  /></button>
                         <button onClick={this.saveData}><img src={SaveIcon}  /></button>
+                        <button onClick={this.validateMethod}><img src={ValidateIcon} /></button>
 
                     </div>
                     <div className="sidenav">
@@ -1497,6 +1518,9 @@ export default class Editor extends Component {
                     <Modal open={this.state.openForm} onClose={this.handleClose.bind(this)} >
                         <KernelDetail essence_kernels= {this.state.essence_kernel} essence_kernel={this.detail_data} graph_global={this.state.graph_global} closeForm={this.handleClose.bind(this)}/>
 
+                    </Modal>
+                    <Modal open={this.state.openValidate} onClose={this.closeValidate.bind(this)}>
+                        <ValidateDetail kernel= {this.state.essence_kernel} closeForm={this.closeValidate.bind(this)}/>
                     </Modal>
                 </div>
 
