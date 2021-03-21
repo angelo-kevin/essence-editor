@@ -45,13 +45,38 @@ class ValidateDetail extends Component {
 
         this.state = {
             rules: [],
-            kernel: this.convertKernel(this.props.kernel)
+            kernel: this.convertKernel(this.props.kernel),
+            edge: this.convertEdge(this.props.edge)
         }
     }
 
 
     capitalize(string){
         return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+
+    convertEdge(edge){
+        let data = []
+
+        edge.forEach(e => {
+            if (e.source && e.target){
+                data.push({
+                    source: {
+                        id: e.source.id,
+                        name: e.source.value,
+                        type: e.source.detail.type
+                    },
+                    target: {
+                        id: e.target.id,
+                        name: e.target.value,
+                        type: e.target.detail.type
+                    }
+                })
+            }
+        })
+
+        return data
     }
 
 
@@ -236,6 +261,39 @@ class ValidateDetail extends Component {
     }
 
 
+    gatherKernel(data, graph){
+        let filter = data.split('=')[0]
+        let value = data.split('=')[1]
+        let arr = []
+
+        if (filter === "TYPE"){
+            graph[value].forEach(el => {
+                arr.push(el.id)
+            })
+
+        } else if (filter === "NAME"){
+            for (let i in graph){
+                let filtered = graph[i].filter(kernel => {
+                    return kernel.name === value
+                })
+
+                if (filtered.length) filtered.forEach(el => arr.push(el.id))
+            }
+
+        } else if (filter === "ID"){
+            for (let i in graph){
+                let filtered = graph[i].filter(kernel => {
+                    return kernel.id === value
+                })
+
+                if (filtered.length) filtered.forEach(el => arr.push(el.id))
+            }
+        }
+
+        return arr
+    }
+
+
     validateCategory(data){
         let table = {
             "element_count": ["MINCOUNT", "MAXCOUNT", "EQUALCOUNT"],
@@ -262,7 +320,6 @@ class ValidateDetail extends Component {
 
     validateRule(data){
         let graph = this.state.kernel
-        console.log(this.props.kernel)
 
         if (data.category === "element_count"){
             let count = 0
@@ -279,7 +336,7 @@ class ValidateDetail extends Component {
                 }
                 count = len
 
-            } else{
+            } else if (filter === "ID"){
                 let len = 0
                 for (let i in graph){
                     len += graph[i].filter(kernel => kernel.id === value).length
@@ -347,7 +404,7 @@ class ValidateDetail extends Component {
                     })
                 }
 
-            } else{
+            } else if (filter === "ID"){
                 let arr = []
                 for (let i in graph){
                     let filtered = graph[i].filter(kernel => {
@@ -394,12 +451,110 @@ class ValidateDetail extends Component {
                     count.forEach(el => {
                         if (el !== num) valid = false
                     })
+                    break
+                default:
+                    valid = 3
             }
 
             return valid
-//DARI SINI
-        } else{
-            let arr = []
+
+        } else if (data.category === "connectivity"){
+            let edge = this.state.edge
+
+            if (data.filter === "TYPE=all" && data.rule === "HASRELATION"){
+                let ids = []
+
+                for (let i in graph){
+                    graph[i].forEach(el => {
+                        ids.push(el.id)
+                    })
+                }
+
+                for (let el in edge){
+                    let i = ids.indexOf(edge[el].source.id)
+                    if (i > -1) ids.splice(i, 1)
+
+                    i = ids.indexOf(edge[el].target.id)
+                    if (i > -1) ids.splice(i, 1)
+
+                    if (!ids.length) return true
+                }
+
+                return false
+            }
+
+            let filter = data.filter.split('=')[0]
+            
+            if (filter !== "AND") return 3
+
+            let left = data.filter.split("AND=")[1].split(',')[0]
+            let right = data.filter.split("AND=")[1].split(',')[1]
+            
+            let leftarr = this.gatherKernel(left, graph)
+            let rightarr = this.gatherKernel(right, graph)
+
+            let valid = true
+            
+            switch(data.rule){
+                case "HASRELATION":
+                    console.log(leftarr, rightarr)
+                    for (let i in leftarr){
+                        for (let j in rightarr){
+                            let temp = edge.filter(el => {
+                                return (el.source.id === leftarr[i] && el.target.id === rightarr[j])
+                                || (el.source.id === rightarr[j] && el.target.id === leftarr[i])
+                            })
+
+                            if (temp.length) break
+
+                            if (j == rightarr.length - 1) valid = false
+                        }
+                        if (!valid) break
+                    }
+                    break
+
+                case "DISJOINT":
+                    for (let i in leftarr){
+                        for (let j in rightarr){
+                            let temp = edge.filter(el => {
+                                return (el.source.id === leftarr[i] && el.target.id === rightarr[j])
+                                || (el.source.id === rightarr[j] && el.target.id === leftarr[i])
+                            })
+                            
+                            if (temp.length) valid = false
+
+                            if (!valid) break
+                        }
+                        if (!valid) break
+                    }
+                    break
+
+                case "ORDER":
+                    for (let i in leftarr){
+                        for (let j in rightarr){
+                            let temp = edge.filter(el => {
+                                return (el.source.id === leftarr[i] && el.target.id === rightarr[j])
+                            })
+                            
+                            if (!temp.length) valid = 2
+
+                            let tempp = edge.filter(el => {
+                                return (el.source.id === rightarr[j] && el.target.id === leftarr[i])
+                            })
+
+                            if (tempp.length) valid = false
+
+                            if (!valid) break
+                        }
+                        if (!valid) break
+                    }
+                    break
+
+                default:
+                    valid = 3
+            }
+
+            return valid
         }
     }
 
@@ -419,6 +574,9 @@ class ValidateDetail extends Component {
                         break
                     case 2:
                         e.color = "lightblue"
+                        break
+                    default:
+                        e.color = "yellow"
                 }
             }
         });
@@ -432,9 +590,7 @@ class ValidateDetail extends Component {
         axios.get('http://localhost:8085/rules').then(res => {
             let rules = [];
             res.data.map(rule => {
-                if (rule.is_active){
-                    rules.push(rule)
-                }
+                if (rule.is_active) rules.push(rule)
             })
             this.validate(rules)
         })

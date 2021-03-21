@@ -1520,7 +1520,7 @@ export default class Editor extends Component {
 
                     </Modal>
                     <Modal open={this.state.openValidate} onClose={this.closeValidate.bind(this)}>
-                        <ValidateDetail kernel= {this.state.essence_kernel} closeForm={this.closeValidate.bind(this)}/>
+                        <ValidateDetail kernel= {this.state.essence_kernel} edge={this.state.edge} closeForm={this.closeValidate.bind(this)}/>
                     </Modal>
                 </div>
 
