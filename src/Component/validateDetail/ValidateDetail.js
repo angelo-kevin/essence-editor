@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles'
-import {Grid, Paper, TextField,} from '@material-ui/core';
 import Button from "@material-ui/core/Button";
-import { Redirect } from 'react-router-dom';
-import { useAlert } from 'react-alert'
+import Modal from "@material-ui/core/Modal/Modal";
+import EditRule from '../validationRule/EditRule'
+import AddRule from '../validationRule/AddRule'
 
 import axios from 'axios';
 
@@ -44,10 +44,37 @@ class ValidateDetail extends Component {
         super(props);
 
         this.state = {
+            openEdit: false,
+            openAdd: false,
             rules: [],
             kernel: this.convertKernel(this.props.kernel),
             edge: this.convertEdge(this.props.edge)
         }
+    }
+
+
+    openEdit(rule){
+        this.setState({
+            openEdit: rule
+        })
+    }
+
+    closeEdit(){
+        this.setState({
+            openEdit: false
+        })
+    }
+
+    openAdd(){
+        this.setState({
+            openAdd: true
+        })
+    }
+
+    closeAdd(){
+        this.setState({
+            openAdd: false
+        })
     }
 
 
@@ -294,7 +321,12 @@ class ValidateDetail extends Component {
     }
 
 
-    validateCategory(data){
+    validateCategoryType(data){
+        let maps = {
+            "correctness": ["connectivity"],
+            "completeness": ["element_count", "properties"]
+        }
+
         let table = {
             "element_count": ["MINCOUNT", "MAXCOUNT", "EQUALCOUNT"],
             "connectivity": ["ORDER", "DISJOINT", "HASRELATION"],
@@ -306,22 +338,23 @@ class ValidateDetail extends Component {
         let operator = data.rule.split('=')[0]
         let filter = data.filter.split('=')[0]
 
-        if (data.category === "connectivity"){
+        if (data.type === "connectivity"){
             valid = (filter === "AND") || data.filter === "TYPE=all"
         }
 
-        if (filter === "AND" && data.category !== "connectivity"){
+        if (filter === "AND" && data.type !== "connectivity"){
             valid = false
         }
 
-        return (data.category in table) && table[data.category].includes(operator) && valid
+        return data.category in maps && maps[data.category].includes(data.type) &&
+            data.type in table && table[data.type].includes(operator) && valid
     }
 
 
     validateRule(data){
         let graph = this.state.kernel
 
-        if (data.category === "element_count"){
+        if (data.type === "element_count"){
             let count = 0
             let filter = data.filter.split('=')[0]
             let value = data.filter.split('=')[1]
@@ -356,7 +389,7 @@ class ValidateDetail extends Component {
                     return count === num
             }
 
-        } else if (data.category === "properties"){
+        } else if (data.type === "properties"){
             let count = []
             let filter = data.filter.split('=')[0]
             let value = data.filter.split('=')[1]
@@ -458,7 +491,7 @@ class ValidateDetail extends Component {
 
             return valid
 
-        } else if (data.category === "connectivity"){
+        } else if (data.type === "connectivity"){
             let edge = this.state.edge
 
             if (data.filter === "TYPE=all" && data.rule === "HASRELATION"){
@@ -561,7 +594,7 @@ class ValidateDetail extends Component {
 
     validate(data){
         data.forEach(e => {
-            if (!this.validateCategory(e)){
+            if (!this.validateCategoryType(e)){
                 e.color = "yellow"
             } else{
                 let bool = this.validateRule(e)
@@ -599,21 +632,35 @@ class ValidateDetail extends Component {
 
     render() {
         const { classes }= this.props;
+        let idx = 0
         if (this.state.rules){
             return (
                     <div className={classes.paper}>
-                        <text style={{fontSize: "200%"}}>Method Validation</text>
+                    <text style={{fontSize: "200%"}}>Method Validation</text>
+                    <Button style={{float: 'right'}} variant="contained" color="primary" onClick={this.openAdd.bind(this)}>
+                        Add Rule
+                    </Button>
                     <br/>
                     <br/>
                     {this.state.rules.map(rule => 
-                        <div style={{backgroundColor: rule.color, marginBottom: "20px"}}>
-                            <text style={{fontSize: "120%"}}>{rule.id}. {this.capitalize(rule.name)}</text>
+                        <div style={{backgroundColor: rule.color, marginBottom: "20px"}} onClick={this.openEdit.bind(this, rule)}>
+                            <text style={{fontSize: "120%"}}>{++idx}. {this.capitalize(rule.name)}</text>
                             <br/>
                             Deskripsi: {this.capitalize(rule.description)}
                             <br/>
                             Kategori: {rule.category}
+                            <br/>
+                            Tipe: {rule.type}
                         </div>
                     )}
+
+                    <Modal open={this.state.openEdit} onClose={this.closeEdit.bind(this)}>
+                        <EditRule rule= {this.state.openEdit} closeForm={this.closeEdit.bind(this)}/>
+                    </Modal>
+
+                    <Modal open={this.state.openAdd} onClose={this.closeAdd.bind(this)}>
+                        <AddRule closeForm={this.closeAdd.bind(this)}/>
+                    </Modal>
 
                     </div>
             );
