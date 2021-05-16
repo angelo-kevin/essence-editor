@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
-import logo from "../../essence.png";
+import logo from "../../logo.png";
 import Modal from '@material-ui/core/Modal';
 import NewMethod from './../../Component/newMethod/NewMethod'
 import Button from '@material-ui/core/Button';
 import {Redirect} from "react-router-dom";
 import EssenceAPI from "./../../Api/EssenceAPI"
+import ExampleMethod from '../../Component/newMethod/ExampleMethod';
 // import from '@material-ui'
 
 
@@ -23,7 +24,8 @@ class Home extends Component {
 
             ],
             loading : true,
-            openForm : false
+            openForm : false,
+            openExample: false
         }
         EssenceAPI.get('/method')
             .then(response=> {
@@ -58,6 +60,18 @@ class Home extends Component {
         })
     };
 
+    openExample() {
+        this.setState({
+            openExample: true
+        })
+    };
+
+    closeExample() {
+        this.setState({
+            openExample: false
+        })
+    };
+
 
     render() {
         const { classes }= this.props;
@@ -84,8 +98,13 @@ class Home extends Component {
                         <Modal open={this.state.openForm} onClose={this.handleClose.bind(this)}>
                             <NewMethod history={this.props.history}  cancel={this.handleClose.bind(this)}/>
                         </Modal>
+                        <Modal open={this.state.openExample} onClose={this.closeExample.bind(this)}>
+                            <ExampleMethod history={this.props.history} cancel={this.closeExample.bind(this)}/>
+                        </Modal>
                         <br/>
                         <Button variant="contained" color="primary" onClick={this.openModal.bind(this)}>New Method</Button>
+                        <br/>
+                        <Button variant="contained" color="primary" onClick={this.openExample.bind(this)}>Clone From Examples</Button>
 
                     </header>
                     <body className="App-body">

@@ -25,6 +25,7 @@ import { black } from "ansi-colors";
 import Json from "../../Assets/Action/json_icon.png";
 import SaveIcon from "../../Assets/Action/save.png";
 import ValidateIcon from "../../Assets/Action/validate.jpg";
+import ManageIcon from "../../Assets/Action/manage.png";
 import Alpha from "../../Assets/EssenceKernel/Alpha.png";
 import ActivityPng from "../../Assets/EssenceKernel/Activity.png";
 import ActivitySpacePng from "../../Assets/EssenceKernel/Activity_Space.png";
@@ -45,10 +46,15 @@ import ActivitySolutionPng from "../../Assets/EssenceKernel/Activity_Solution.pn
 import ActivitySpaceSolutionPng from "../../Assets/EssenceKernel/Activity_Space_Solution.png";
 import CompetencySolutionPng from "../../Assets/EssenceKernel/Competency_Solution.png";
 import WorkProductSolutionPng from "../../Assets/EssenceKernel/Work_Product_Solution.png";
+import AlphaDesc from "../../Assets/EssenceKernel/Alpha_Desc.png";
+import ActivityDesc from "../../Assets/EssenceKernel/Activity_Desc.png";
+import ActivitySpaceDesc from "../../Assets/EssenceKernel/Activity_Space_Desc.png";
+import CompetencyDesc from "../../Assets/EssenceKernel/Competency_Desc.png";
+import WorkProductDesc from "../../Assets/EssenceKernel/Work_Product_Desc.png";
 import KernelDetail from "../../Component/kernelDetail/KernelDetail";
 import ValidateDetail from "../../Component/validateDetail/ValidateDetail";
+import ManageRule from "../../Component/validationRule/ManageRule";
 import Modal from "@material-ui/core/Modal/Modal";
-import Button from "@material-ui/core/Button/Button";
 
 import axios from 'axios';
 
@@ -62,6 +68,7 @@ export default class Editor extends Component {
             loading : true,
             openForm : false,
             openValidate : false,
+            openManage: false,
             name: '',
             description: '',
             author: '',
@@ -85,6 +92,7 @@ export default class Editor extends Component {
         this.saveData = this.saveData.bind(this);
         this.stringifyWithoutCircular = this.stringifyWithoutCircular.bind(this)
         this.validateMethod = this.validateMethod.bind(this)
+        this.manageRule = this.manageRule.bind(this)
 
         console.log(this.props.match.params.id)
 
@@ -144,15 +152,15 @@ export default class Editor extends Component {
 
     };
 
-    openValidate(){
-        this.setState({
-            openValidate: true
-        })
-    }
-
     closeValidate(){
         this.setState({
             openValidate: false
+        })
+    }
+
+    closeManage(){
+        this.setState({
+            openManage: false
         })
     }
 
@@ -198,7 +206,15 @@ export default class Editor extends Component {
     }
 
     validateMethod() {
-        this.openValidate();
+        this.setState({
+            openValidate: true
+        })
+    }
+
+    manageRule() {
+        this.setState({
+            openManage: true
+        })
     }
 
     componentDidMount() {
@@ -1501,14 +1517,14 @@ export default class Editor extends Component {
                         <button onClick={this.toJSON}><img src={Json}  /></button>
                         <button onClick={this.saveData}><img src={SaveIcon}  /></button>
                         <button onClick={this.validateMethod}><img src={ValidateIcon} /></button>
-
+                        <button onClick={this.manageRule}><img src={ManageIcon} /></button>
                     </div>
                     <div className="sidenav">
-                        <button onClick={this.addAlpha}><img src={Alpha}/></button>
-                        <button onClick={this.addActivity}><img src={ActivityPng}/></button>
-                        <button onClick={this.addActivitySpace}><img src={ActivitySpacePng}/></button>
-                        <button onClick={this.addCompetency}><img src={CompetencyPng}/></button>
-                        <button onClick={this.addWorkProduct}><img src={WorkProductPng}/></button>
+                        <button onClick={this.addAlpha}><img src={AlphaDesc}/></button>
+                        <button onClick={this.addActivity}><img src={ActivityDesc}/></button>
+                        <button onClick={this.addActivitySpace}><img src={ActivitySpaceDesc}/></button>
+                        <button onClick={this.addCompetency}><img src={CompetencyDesc}/></button>
+                        <button onClick={this.addWorkProduct}><img src={WorkProductDesc}/></button>
                     </div>
                     <div className="Base" >
 
@@ -1521,6 +1537,9 @@ export default class Editor extends Component {
                     </Modal>
                     <Modal open={this.state.openValidate} onClose={this.closeValidate.bind(this)}>
                         <ValidateDetail kernel= {this.state.essence_kernel} edge={this.state.edge} closeForm={this.closeValidate.bind(this)}/>
+                    </Modal>
+                    <Modal open={this.state.openManage} onClose={this.closeManage.bind(this)}>
+                        <ManageRule closeForm={this.closeManage.bind(this)}/>
                     </Modal>
                 </div>
 

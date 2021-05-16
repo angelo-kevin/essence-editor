@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles'
-import Button from "@material-ui/core/Button";
-import Modal from "@material-ui/core/Modal/Modal";
-import EditRule from '../validationRule/EditRule'
-import AddRule from '../validationRule/AddRule'
 
 import axios from 'axios';
 
@@ -44,37 +40,10 @@ class ValidateDetail extends Component {
         super(props);
 
         this.state = {
-            openEdit: false,
-            openAdd: false,
             rules: [],
             kernel: this.convertKernel(this.props.kernel),
             edge: this.convertEdge(this.props.edge)
         }
-    }
-
-
-    openEdit(rule){
-        this.setState({
-            openEdit: rule
-        })
-    }
-
-    closeEdit(){
-        this.setState({
-            openEdit: false
-        })
-    }
-
-    openAdd(){
-        this.setState({
-            openAdd: true
-        })
-    }
-
-    closeAdd(){
-        this.setState({
-            openAdd: false
-        })
     }
 
 
@@ -530,7 +499,9 @@ class ValidateDetail extends Component {
             
             switch(data.rule){
                 case "HASRELATION":
-                    console.log(leftarr, rightarr)
+                    if (!leftarr.length || !rightarr.length){
+                        valid = false
+                    }
                     for (let i in leftarr){
                         for (let j in rightarr){
                             let temp = edge.filter(el => {
@@ -637,13 +608,20 @@ class ValidateDetail extends Component {
             return (
                     <div className={classes.paper}>
                     <text style={{fontSize: "200%"}}>Method Validation</text>
-                    <Button style={{float: 'right'}} variant="contained" color="primary" onClick={this.openAdd.bind(this)}>
-                        Add Rule
-                    </Button>
+                    <br/><br/>
+                    <b>Legenda:</b>
+                    <br/>
+                    <div style={{float: 'left', width: '18px', height: '18px', background: 'red', marginRight: '5px'}}></div>Aturan validasi tidak dipenuhi
+                    <br/>
+                    <div style={{float: 'left', width: '18px', height: '18px', background: 'lightgreen', marginRight: '5px'}}></div>Aturan validasi dipenuhi
+                    <br/>
+                    <div style={{float: 'left', width: '18px', height: '18px', background: 'yellow', marginRight: '5px'}}></div>Terdapat kesalahan pada sintaks dari aturan validasi; tidak sesuai dengan konvensi
+                    <br/>
+                    <div style={{float: 'left', width: '18px', height: '18px', background: 'lightblue', marginRight: '5px'}}></div>Elemen Kernel atau relasi antar elemen yang dirujuk oleh aturan validasi tidak ada pada metode
                     <br/>
                     <br/>
                     {this.state.rules.map(rule => 
-                        <div style={{backgroundColor: rule.color, marginBottom: "20px"}} onClick={this.openEdit.bind(this, rule)}>
+                        <div style={{backgroundColor: rule.color, marginBottom: "20px"}}>
                             <text style={{fontSize: "120%"}}>{++idx}. {this.capitalize(rule.name)}</text>
                             <br/>
                             Deskripsi: {this.capitalize(rule.description)}
@@ -653,15 +631,6 @@ class ValidateDetail extends Component {
                             Tipe: {rule.type}
                         </div>
                     )}
-
-                    <Modal open={this.state.openEdit} onClose={this.closeEdit.bind(this)}>
-                        <EditRule rule= {this.state.openEdit} closeForm={this.closeEdit.bind(this)}/>
-                    </Modal>
-
-                    <Modal open={this.state.openAdd} onClose={this.closeAdd.bind(this)}>
-                        <AddRule closeForm={this.closeAdd.bind(this)}/>
-                    </Modal>
-
                     </div>
             );
         } else{
